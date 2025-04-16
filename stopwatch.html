@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stopwatch with Save on Stop</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #1f4037, #99f2c8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .stopwatch {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+      text-align: center;
+      width: 350px;
+    }
+
+    .time {
+      font-size: 3rem;
+      margin-bottom: 20px;
+    }
+
+    .milliseconds {
+      font-size: 1.2rem;
+      color: #888;
+    }
+
+    .buttons button {
+      font-size: 1rem;
+      padding: 10px 16px;
+      margin: 6px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .start { background: #4caf50; color: white; }
+    .stop { background: #f44336; color: white; }
+    .reset { background: #2196f3; color: white; }
+
+    .buttons button:hover {
+      opacity: 0.85;
+    }
+
+    .laps {
+      margin-top: 20px;
+      text-align: left;
+      max-height: 150px;
+      overflow-y: auto;
+      padding: 0 10px;
+    }
+
+    .laps h3 {
+      margin: 0 0 10px;
+    }
+
+    .lap-time {
+      background: #f1f1f1;
+      padding: 6px 12px;
+      border-radius: 6px;
+      margin-bottom: 5px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <div class="stopwatch">
+    <div class="time" id="display">00:00:00.<span class="milliseconds" id="ms">00</span></div>
+    <div class="buttons">
+      <button class="start" onclick="start()">Start</button>
+      <button class="stop" onclick="stop()">Stop</button>
+      <button class="reset" onclick="reset()">Reset</button>
+    </div>
+    <div class="laps" id="laps">
+      <h3>Saved Times:</h3>
+      <div id="lap-list"></div>
+    </div>
+  </div>
+
+  <script>
+    let [hours, minutes, seconds, milliseconds] = [0, 0, 0, 0];
+    let timer = null;
+
+    function updateDisplay() {
+      const h = String(hours).padStart(2, '0');
+      const m = String(minutes).padStart(2, '0');
+      const s = String(seconds).padStart(2, '0');
+      const ms = String(milliseconds).padStart(2, '0');
+      document.getElementById("display").innerHTML =
+        `${h}:${m}:${s}.<span class="milliseconds">${ms}</span>`;
+    }
+
+    function stopwatch() {
+      milliseconds++;
+      if (milliseconds === 100) {
+        milliseconds = 0;
+        seconds++;
+      }
+      if (seconds === 60) {
+        seconds = 0;
+        minutes++;
+      }
+      if (minutes === 60) {
+        minutes = 0;
+        hours++;
+      }
+      updateDisplay();
+    }
+
+    function start() {
+      if (timer !== null) return;
+      timer = setInterval(stopwatch, 10);
+    }
+
+    function stop() {
+      clearInterval(timer);
+      timer = null;
+
+      // Save the current time
+      const h = String(hours).padStart(2, '0');
+      const m = String(minutes).padStart(2, '0');
+      const s = String(seconds).padStart(2, '0');
+      const ms = String(milliseconds).padStart(2, '0');
+      const savedTime = `${h}:${m}:${s}.${ms}`;
+
+      const lapList = document.getElementById("lap-list");
+      const lapItem = document.createElement("div");
+      lapItem.className = "lap-time";
+      lapItem.textContent = savedTime;
+      lapList.prepend(lapItem); // show latest at top
+    }
+
+    function reset() {
+      stop();
+      [hours, minutes, seconds, milliseconds] = [0, 0, 0, 0];
+      updateDisplay();
+      document.getElementById("lap-list").innerHTML = '';
+    }
+
+    updateDisplay();
+  </script>
+</body>
+</html>
